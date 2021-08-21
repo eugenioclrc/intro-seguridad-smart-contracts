@@ -16,16 +16,20 @@ describe("Ejercicio 0", function () {
     });
 
     describe("Inicialización", function () {
-        it.skip('La cuenta minter es el deployer', async function () {
-            // COMPLETAR
+        it('La cuenta minter es el deployer', async function () {
+            const minterAddress = await this.token.minter();
+            expect(minterAddress).to.eq(deployer.address, 'el minter no es el deployer');
         });
 
         it('El total supply del token es el esperado', async function () {
             expect(await this.token.totalSupply()).to.eq(INITIAL_SUPPLY);
         });
 
-        it.skip('Todo el total supply es asignado al deployer', async function () {
-            // COMPLETAR
+        it('Todo el total supply es asignado al deployer', async function () {
+            const totalSupply = await this.token.totalSupply();
+            const minterBalance = await this.token.balanceOf(deployer.address);
+
+            expect(totalSupply).to.eq(minterBalance)
         });
     });
 
@@ -45,12 +49,18 @@ describe("Ejercicio 0", function () {
     });
 
     describe("Minting", function() {
-        it.skip('Un usuario sin permisos no puede mintear tokens', async function () {
-            // COMPLETAR
+        it('Un usuario sin permisos no puede mintear tokens', async function () {
+            await expect(
+                this.token.connect(otroUsuario).mint(otroUsuario.address, ethers.utils.parseUnits('1', 'ether'))
+            ).to.be.reverted;
         });
 
-        it.skip('Un usuario con permisos puede mintear tokens', async function () {
-            // COMPLETAR
+        it('Un usuario con permisos puede mintear tokens', async function () {
+            const initialBalance = await this.token.balanceOf(deployer.address);
+            await this.token.connect(deployer).mint(deployer.address, ethers.utils.parseUnits('1', 'ether'));
+            const currentBalance = await this.token.balanceOf(deployer.address);
+
+            expect(currentBalance.sub(initialBalance)).to.eq(ethers.utils.parseUnits('1', 'ether'))
         });
     });
 });
